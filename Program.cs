@@ -2,17 +2,38 @@
 {
     internal class Program
     {
+        const string FILL_METHOD_NUMBERS = "numbers";
+        const string FILL_METHOD_CHECKERS = "checkers";
+        const string FILL_METHOD_RANDOM = "random";
+        const int FILL_METHOD_RANGE_LOW = 1;
+        const int FILL_METHOD_RANGE_HIGH = 100;
+        const string FILL_METHOD_ICONS = "icons";
+        const string DISPLAY_MODE_INDICES = "indices";
+        const string DISPLAY_MODE_BORDER = "border";
+        const string DISPLAY_MODE_BOXED = "boxed";
+        const string COLOR_METHOD_NONE = "none";
+        const string COLOR_METHOD_HEATMAP = "heatmap";
+        const string COLOR_METHOD_RANDOM = "random";
+
         static void Main()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            const string FILL_METHOD_NUMBERS = "numbers";
-            const string FILL_METHOD_CHESSBOARD = "chessboard";
-            const string FILL_METHOD_RANDOM = "random";
-            const string DISPLAY_MODE_INDICES = "indices";
-            const string DISPLAY_MODE_BORDER = "border";
-            const string DISPLAY_MODE_BOXED = "boxed";
+
 
             Random random = new();
+            List<string> utf8Icons = new()
+            {
+                "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊", // 1-10
+                "😋", "😎", "😍", "😘", "😗", "😙", "😚", "🙂", "🤗", "🤩", // 11-20
+                "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮", // 21-30
+                "🤐", "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", "🤤", // 31-40
+                "😒", "😓", "😔", "😕", "🙃", "🤑", "😲", "☹️", "🙁", "😖", // 41-50
+                "😞", "😟", "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", // 51-60
+                "😬", "😰", "😱", "🥵", "🥶", "😳", "🤪", "😵", "😡", "😠", // 61-70
+                "🤬", "😷", "🤒", "🤕", "🤢", "🤮", "🤧", "😇", "🥳", "🥸", // 71-80
+                "😈", "👿", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", // 81-90
+                "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🦄", "🐱"  // 91-100
+            };
 
             while (true)
             {
@@ -61,7 +82,7 @@
                 // get fill method
                 while (true)
                 {
-                    Console.WriteLine($"Please choose the fill method: {FILL_METHOD_NUMBERS}, {FILL_METHOD_CHESSBOARD}, {FILL_METHOD_RANDOM}");
+                    Console.WriteLine($"Please choose the fill method: {FILL_METHOD_NUMBERS}, {FILL_METHOD_CHECKERS}, {FILL_METHOD_ICONS}, {FILL_METHOD_RANDOM}");
                     string? fillMethod = Console.ReadLine()?.ToLower();
                     switch (fillMethod)
                     {
@@ -75,7 +96,7 @@
                                 }
                             }
                             break;
-                        case FILL_METHOD_CHESSBOARD:
+                        case FILL_METHOD_CHECKERS:
                             for (int i = 0; i < grid.GetLength(0); i++)
                             {
                                 for (int j = 0; j < grid.GetLength(1); j++)
@@ -96,7 +117,16 @@
                             {
                                 for (int j = 0; j < grid.GetLength(1); j++)
                                 {
-                                    grid[i, j] = random.Next(1, 100);
+                                    grid[i, j] = random.Next(FILL_METHOD_RANGE_LOW, FILL_METHOD_RANGE_HIGH);
+                                }
+                            }
+                            break;
+                        case FILL_METHOD_ICONS:
+                            for (int i = 0; i < grid.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < grid.GetLength(1); j++)
+                                {
+                                    grid[i, j] = utf8Icons[random.Next(0, utf8Icons.Count)];
                                 }
                             }
                             break;
@@ -115,6 +145,32 @@
                             Console.Write($"{grid[i, j],3} ");
                         }
                         Console.WriteLine();
+                    }
+                    break;
+                }
+
+                // Choose color method
+                string colorMethod = COLOR_METHOD_NONE;
+                while (true)
+                {
+                    Console.WriteLine($"Choose the color method: {COLOR_METHOD_NONE}, {COLOR_METHOD_RANDOM}, {COLOR_METHOD_HEATMAP}");
+                    Console.WriteLine($"Note: Color methods only available for fill methods: {FILL_METHOD_NUMBERS}, {FILL_METHOD_RANDOM}");
+                    Console.WriteLine($"      and display methods: {DISPLAY_MODE_BORDER}, {DISPLAY_MODE_BOXED}");
+                    colorMethod = Console.ReadLine()?.ToLower();
+                    switch (colorMethod)
+                    {
+                        case COLOR_METHOD_NONE:
+                            Console.WriteLine("No color method selected.");
+                            break;
+                        case COLOR_METHOD_RANDOM:
+                            Console.WriteLine("Random color method selected.");
+                            break;
+                        case COLOR_METHOD_HEATMAP:
+                            Console.WriteLine("Heatmap color method selected.");
+                            break;
+                        default:
+                            Console.WriteLine("Invalid color method. Please try again.");
+                            continue;
                     }
                     break;
                 }
@@ -153,7 +209,7 @@
                                 Console.WriteLine();
                                 if (i < grid.GetLength(0) - 1)
                                 {
-                                    Console.WriteLine(new string('-', (grid.GetLength(1) * (maxIndexWidth + 2)) + (grid.GetLength(1) -3))); // Adjust for spacing
+                                    Console.WriteLine(new string('-', (grid.GetLength(1) * (maxIndexWidth + 2)) + (grid.GetLength(1) - 3))); // Adjust for spacing
                                 }
                             }
                             break;
@@ -178,7 +234,10 @@
                                 Console.Write("#"); // Left border
                                 for (int j = 0; j < grid.GetLength(1); j++)
                                 {
-                                    Console.Write($" {grid[i, j].ToString().PadLeft(cellWidth - 1)} "); // Grid value with padding
+                                    string value = grid[i, j].ToString().PadLeft(cellWidth - 1);
+                                    ApplyColorMethod(value, grid[i, j], colorMethod, grid);
+                                    Console.Write($" {value} ");
+                                    Console.ResetColor();
                                 }
                                 Console.WriteLine("#"); // Right border
                             }
@@ -204,7 +263,7 @@
                             Console.Write("+");
                             for (int j = 0; j < grid.GetLength(1); j++)
                             {
-                                Console.Write(new string('-', cellWidth +1 ) + "+");
+                                Console.Write(new string('-', cellWidth + 1) + "+");
                             }
                             Console.WriteLine();
 
@@ -214,7 +273,10 @@
                                 Console.Write("|"); // Left border
                                 for (int j = 0; j < grid.GetLength(1); j++)
                                 {
-                                    Console.Write($" {grid[i, j].ToString().PadLeft(cellWidth - 1)} |");
+                                    string value = grid[i, j].ToString().PadLeft(cellWidth - 1);
+                                    ApplyColorMethod(value, grid[i, j], colorMethod, grid);
+                                    Console.Write($" {value} |");
+                                    Console.ResetColor();
                                 }
                                 Console.WriteLine();
 
@@ -222,16 +284,53 @@
                                 Console.Write("+");
                                 for (int j = 0; j < grid.GetLength(1); j++)
                                 {
-                                    Console.Write(new string('-', cellWidth +1) + "+");
+                                    Console.Write(new string('-', cellWidth + 1) + "+");
                                 }
                                 Console.WriteLine();
                             }
                             break;
+                        default:
+                            Console.WriteLine("Invalid display method. Please try again.");
+                            continue;
                     }
                     Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
                     break;
                 }
+            }
+        }
+
+        static void ApplyColorMethod(string value, int cellValue, string? colorMethod, dynamic[,] grid)
+        {
+
+            if (colorMethod == COLOR_METHOD_HEATMAP)
+            {
+                int min = int.MaxValue, max = int.MinValue;
+                for (int i = 0; i < grid.GetLength(0); i++)
+                {
+                    for (int j = 0; j < grid.GetLength(1); j++)
+                    {
+                        min = Math.Min(min, grid[i, j]);
+                        max = Math.Max(max, grid[i, j]);
+                    }
+                }
+
+                int range = max - min;
+                if (range == 0) range = 1; // no division by zero
+
+                // Map the value to a heatmap color
+                double normalized = (double)(cellValue - min) / range; // guarantee 0.0 to 1.0
+                if (normalized < 0.2) Console.ForegroundColor = ConsoleColor.Blue;
+                else if (normalized < 0.4) Console.ForegroundColor = ConsoleColor.Green;
+                else if (normalized < 0.6) Console.ForegroundColor = ConsoleColor.Yellow;
+                else if (normalized < 0.8) Console.ForegroundColor = ConsoleColor.Red;
+                else Console.ForegroundColor = ConsoleColor.Magenta;
+            }
+            if (colorMethod == COLOR_METHOD_RANDOM)
+            {
+                // Apply a random color to each cell
+                Random random = new();
+                Console.ForegroundColor = (ConsoleColor)random.Next(1, 16); // Random color from ConsoleColor
             }
         }
     }
